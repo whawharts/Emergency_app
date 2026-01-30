@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'emergency_menu.dart';
 import 'sign_up.dart';
+import '../auth/auth_service.dart';
+
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,25 +12,34 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+  //auth service
+  final AuthService _authService = AuthService();
+  //text controllers
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  void handleLogin() {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+  Future<void> handleLogin() async {
+  final email = emailController.text.trim();
+  final password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email and password are required')),
-      );
-      return;
-    }
+  if (email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Email and password are required')),
+    );
+    return;
+  }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const EmergencyMenuPage()),
+  try {
+    await _authService.signInWithEmailPassword(email, password);
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Login failed: $e')),
     );
   }
+}
+
 
   void handleCreateAccount() {
     Navigator.push(
