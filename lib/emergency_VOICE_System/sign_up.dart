@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'emergency_menu.dart';
+import '../auth/auth_service.dart';
+
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -8,6 +9,9 @@ class SignUpPage extends StatefulWidget {
   State<SignUpPage> createState() => _SignUpPageState();
 }
 
+//auth service
+final AuthService _authService = AuthService();
+
 class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController contactController = TextEditingController();
@@ -15,35 +19,40 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
-  void handleSignUp() {
-    if (fullNameController.text.isEmpty ||
-        contactController.text.isEmpty ||
-        emailController.text.isEmpty ||
-        passwordController.text.isEmpty ||
-        confirmPasswordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('All fields are required')),
-      );
-      return;
-    }
+  Future<void> handleSignUp() async {
+  if (fullNameController.text.isEmpty ||
+      contactController.text.isEmpty ||
+      emailController.text.isEmpty ||
+      passwordController.text.isEmpty ||
+      confirmPasswordController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('All fields are required')),
+    );
+    return;
+  }
 
-    if (passwordController.text != confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
-      return;
-    }
+  if (passwordController.text != confirmPasswordController.text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Passwords do not match')),
+    );
+    return;
+  }
 
+  try {
+    await _authService.signUpWithEmailPassword(
+      emailController.text.trim(),
+      passwordController.text.trim(),
+    );
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Account created successfully')),
     );
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const EmergencyMenuPage()),
-      (route) => false,
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Sign up failed: $e')),
     );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
