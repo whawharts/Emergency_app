@@ -19,6 +19,10 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
+
+
   Future<void> handleSignUp() async {
   if (fullNameController.text.isEmpty ||
       contactController.text.isEmpty ||
@@ -57,7 +61,7 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 247, 193, 193),
+      backgroundColor: const Color.fromARGB(255, 243, 216, 216),
       appBar: AppBar(
         title: const Text('Create Account'),
         backgroundColor: const Color.fromARGB(255, 187, 28, 28),
@@ -110,25 +114,51 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               const SizedBox(height: 12),
+
               TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
+  controller: passwordController,
+  obscureText: !_isPasswordVisible,
+  decoration: InputDecoration(
+    labelText: 'Password',
+    prefixIcon: const Icon(Icons.lock),
+    border: const OutlineInputBorder(),
+    suffixIcon: IconButton(
+      icon: Icon(
+        _isPasswordVisible
+            ? Icons.visibility
+            : Icons.visibility_off,
+      ),
+      onPressed: () {
+        setState(() {
+          _isPasswordVisible = !_isPasswordVisible;
+        });
+      },
+    ),
+  ),
+),
+const SizedBox(height: 12),
               TextField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm Password',
-                  prefixIcon: Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(),
-                ),
-              ),
+  controller: confirmPasswordController,
+  obscureText: !_isConfirmPasswordVisible,
+  decoration: InputDecoration(
+    labelText: 'Confirm Password',
+    prefixIcon: const Icon(Icons.lock_outline),
+    border: const OutlineInputBorder(),
+    suffixIcon: IconButton(
+      icon: Icon(
+        _isConfirmPasswordVisible
+            ? Icons.visibility
+            : Icons.visibility_off,
+      ),
+      onPressed: () {
+        setState(() {
+          _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+        });
+      },
+    ),
+  ),
+),
+const SizedBox(height: 12),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
