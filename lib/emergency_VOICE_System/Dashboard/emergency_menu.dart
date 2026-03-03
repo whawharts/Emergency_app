@@ -170,47 +170,60 @@ class _EmergencyMenuPageState extends State<EmergencyMenuPage> {
 void initState() {
   super.initState();
   _loadUser();
-
-  // refresh location then convert to address
-  LocationService.refresh().then((pos) async {
-    if (!mounted) return;
-
-    if (pos != null) {
-      setState(() => _isLoadingAddress = true);
-
-      final addr = await LocationService.getAddressFromPosition(pos);
-
-      if (!mounted) return;
-      setState(() {
-        _address = addr ?? "Address not available";
-        _isLoadingAddress = false;
-      });
-    } else {
-      setState(() {
-        _address = LocationService.lastError ?? "Location not available";
-        _isLoadingAddress = false;
-      });
-    }
-  });
+  _initLocationFlow();
 }
 
+Future<void> _initLocationFlow() async {
+  if (!mounted) return;
 
+  setState(() => _isLoadingAddress = true);
 
+  try {
+    final pos = await LocationService.refresh();
+
+    if (pos == null) {
+      setState(() {
+        _address = LocationService.lastError ?? "Location not available";
+      });
+      return;
+    }
+
+    // 1) Convert to address (with timeout)
+    String? addr;
+    try {
+      addr = await LocationService.getAddressFromPosition(pos)
+          .timeout(const Duration(seconds: 8));
+    } catch (_) {
+      addr = "Address lookup failed (check internet)";
+    }
+
+    // 2) SAVE TO DB (with timeout + catch)
+    try {
+      await LocationService.saveToDatabase(
+        userId: supabase.auth.currentUser!.id, // ✅ don’t use userId! state
+        pos: pos,
+        address: addr,
+      ).timeout(const Duration(seconds: 8));
+    } catch (e) {
+      // If saving fails, still show address (don’t freeze)
+      debugPrint("Save location failed: $e");
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _address = addr ?? "Address not available";
+    });
+  } finally {
+    if (!mounted) return;
+    setState(() => _isLoadingAddress = false);
+  }
+}
 
 
   // 🔹 LOGOUT HANDLER
   Future<void> _handleLogout(BuildContext context) async {
     await _authService.signOut();
   }
-
-
-
-
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     if (isLoading) {

@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Emergency Voice',
+      title: 'SLPC Alert',
       theme: ThemeData(
         primaryColor: Colors.red,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),

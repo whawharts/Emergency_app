@@ -1,7 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:flutter/foundation.dart';
 class LocationService {
 
   static Position? _lastKnown;
@@ -76,21 +76,26 @@ class LocationService {
   // Save location to Supabase database
   static Future<void> saveToDatabase({
   required Position pos,
-  String? address, 
+  String? address,
   required String userId,
-  }) async {
-    final supabase = Supabase.instance.client;
-    final user = supabase.auth.currentUser;
+}) async {
+  final supabase = Supabase.instance.client;
 
-    if (user == null) return;
-
-    await supabase.from('user_location').upsert({
-      'user_id': user.id,
+  try {
+    final res = await supabase.from('user_location').upsert({
+      'user_id': userId, // ✅ use the parameter you pass in
       'lat': pos.latitude,
-      'lng': pos.longitude,
+      'lng': pos.longitude, // ✅ must match your DB column name: lng
       'address': address,
       'accuracy': pos.accuracy,
-    });
+      'updated_at': DateTime.now().toIso8601String(),
+    }).select();
+
+    debugPrint("✅ saved location: $res");
+  } catch (e) {
+    debugPrint("❌ save location error: $e");
+    rethrow;
   }
+}
 
 }
