@@ -83,17 +83,17 @@ class LocationService {
 
   try {
     final res = await supabase.from('user_location').upsert({
-      'user_id': userId, // ✅ use the parameter you pass in
+      'user_id': userId, // use the parameter you pass in
       'lat': pos.latitude,
-      'lng': pos.longitude, // ✅ must match your DB column name: lng
+      'lng': pos.longitude, //  must match your DB column name: lng
       'address': address,
       'accuracy': pos.accuracy,
       'updated_at': DateTime.now().toIso8601String(),
     }).select();
 
-    debugPrint("✅ saved location: $res");
+    debugPrint(" saved location: $res");
   } catch (e) {
-    debugPrint("❌ save location error: $e");
+    debugPrint("save location error: $e");
     rethrow;
   }
 }
